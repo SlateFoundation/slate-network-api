@@ -4,7 +4,7 @@ namespace Slate\Network\API;
 
 class RequestHandler extends \RequestHandler
 {
-    public static $apiKey = 'abc';
+    public static $apiKey;
 
     public static function handleRequest()
     {
