@@ -2,6 +2,9 @@
 
 namespace Slate\Network\API;
 
+use \Emergence\People\PeopleRequestHandler;
+use \Emergence\People\Person;
+
 class RequestHandler extends \RequestHandler
 {
     public static $apiKey;
@@ -24,7 +27,8 @@ class RequestHandler extends \RequestHandler
 
     public static function handleUsersRequest()
     {
-        \Emergence\People\PeopleRequestHandler::$accountLevelBrowse = false;
-        return \Emergence\People\PeopleRequestHandler::handleRequest();
+        PeopleRequestHandler::$accountLevelBrowse = false;
+        Person::$dynamicFields['PrimaryEmail']['accountLevelEnumerate'] = null;
+        return PeopleRequestHandler::handleRequest();
     }
 }
