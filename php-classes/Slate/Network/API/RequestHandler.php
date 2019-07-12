@@ -24,6 +24,7 @@ class RequestHandler extends \RequestHandler
 
     public static function handleUsersRequest()
     {
+        \Emergence\People\PeopleRequestHandler::$accountLevelBrowse = false;
         return \Emergence\People\PeopleRequestHandler::handleRequest();
     }
 }
