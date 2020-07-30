@@ -1,3 +1,3 @@
 <?php
 
-\Slate\Network\API\RequestHandler::handleRequest();
+\Slate\Network\Site\Connector::handleRequest();

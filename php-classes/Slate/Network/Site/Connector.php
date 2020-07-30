@@ -1,15 +1,26 @@
 <?php
 
-namespace Slate\Network\API;
+namespace Slate\Network\Site;
 
+use Site;
+
+use Emergence\Connectors\AbstractConnector;
 use \Emergence\People\PeopleRequestHandler;
 use \Emergence\People\Person;
 
 use Firebase\JWT\JWT;
 
-class RequestHandler extends \RequestHandler
+class Connector extends AbstractConnector
 {
-    public static $apiKey = 'abc';
+    // Connector cfg
+    public static $title = 'Network Site Connector';
+    public static $connectorId = 'slate-network-site';
+
+    // Slate Network cfg
+    public static $hubUrl;
+    public static $apiKey;
+
+    // RequestHandler cfg
     public static $responseMode = 'json';
     public static $userResponseModes = [
         'application/json' => 'json'
@@ -20,6 +31,7 @@ class RequestHandler extends \RequestHandler
         $action = $action ?: static::shiftPath();
 
         switch ($action) {
+
             case 'users':
                 return static::handleUsersRequest();
 
@@ -30,8 +42,33 @@ class RequestHandler extends \RequestHandler
                 return static::handleFinishNetworkLoginRequest();
 
             default:
-                return static::throwInvalidRequestError();
+                return parent::handleRequest();
         }
+    }
+
+    public static function launchWithAuth()
+    {
+        $handlerPath = array_merge(['site-root', 'network'], array_filter(Site::$pathStack));
+        $handlerPath[count($handlerPath) - 1] .= '.php';
+
+        $node = Site::resolvePath($handlerPath);
+
+        if (!$node) {
+            return static::throwInvalidRequestError('test123');
+        }
+
+        $GLOBALS['_NETWORK'] = [
+            'site' => Site::getConfig('handle'),
+            'user' => [
+                'username' => 'nbey@b-21.org',
+                'email' => 'nbey@b-21.org',
+                'student_number' => 12345,
+                'first_name' => 'NafisTest',
+                'last_name' => 'BeyTest'
+            ]
+        ];
+
+        Site::executeScript($node);
     }
 
     public static function handleFinishNetworkLoginRequest()
