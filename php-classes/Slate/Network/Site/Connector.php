@@ -73,40 +73,34 @@ class Connector extends AbstractConnector
 
     public static function handleFinishNetworkLoginRequest()
     {
-        session_start();
-        // redirect to domain + returnUrl decoded from token
-        if (!$token = $_SESSION['JWT']) {
-            return static::throwInvalidRequestError('Unable to decode JWT Token. Please contact an administrator, or try again.');
-        }
-
-        $redirectTo = 'http://' . $token->domain . $token->returnUrl;
         $queryParameters = http_build_query([
-            'domain' => \Site::getConfig('primary_hostname'),
-            'JWT' => JWT::encode([
-                'session_handle' => $GLOBALS['Session']->Handle,
-                // 'person' => $_SESSION['User']
+            'hub_token' => JWT::encode([
+                'user' => array_merge(
+                    $GLOBALS['Session']->Person->getSummary(),
+                    [
+                        'PrimaryEmail' => $GLOBALS['Session']->Person->PrimaryEmail->toString()
+                    ]
+                ),
+                'hostname' => 'vm.nafis.me:89' // TODO: replace with Site::getConfig('primary_hostname')
             ], static::$apiKey)
         ]);
 
-        header('Location: '. $redirectTo. "?{$queryParameters}");
+        if (!$_REQUEST['redirectUrl']) {
+            return static::throwInvalidRequestError('Redirect URL not set. Please try again or contact an administrator.');
+        }
+
+        $queryParameterGlue = strpos($_REQUEST['redirectUrl'], '?') === -1 ? '?' : '&';
+
+        // TODO: can we always assume query params are being appending to existing, or should we check?
+        header('Location: ' . $_REQUEST['redirectUrl'] . "{$queryParameterGlue}{$queryParameters}");
     }
 
     public static function handleNetworkLoginRequest()
     {
-        session_start();
-        // decode JWT token from slate networkhub site
-        try {
-            $token = JWT::decode($_REQUEST['JWT'], static::$apiKey, ['HS256']);
-            $_SESSION['JWT'] = $token;
-            \MICS::dump($_SESSION, 'session b4');
-            sleep(5);
-        } catch (\Exception $e) {
-            return static::throwInvalidRequestError('Unable to decode JWT Token. Please contact an administrator, or try again.');
-        }
-
         $queryParameters = http_build_query([
-            'username' => $token->username,
-            'returnUrl' => '/network-api/finish-login'
+            'returnUrl' => '/network-api/finish-login?redirectUrl=' . $_REQUEST['redirectUrl'],
+            'redirectUrl' => $_REQUEST['redirectUrl'],
+            'username' => $_REQUEST['username']
         ]);
 
         \Site::redirect('/login?'.$queryParameters);
