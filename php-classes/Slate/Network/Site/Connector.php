@@ -46,31 +46,6 @@ class Connector extends AbstractConnector
         }
     }
 
-    public static function launchWithAuth()
-    {
-        $handlerPath = array_merge(['site-root', 'network'], array_filter(Site::$pathStack));
-        $handlerPath[count($handlerPath) - 1] .= '.php';
-
-        $node = Site::resolvePath($handlerPath);
-
-        if (!$node) {
-            return static::throwInvalidRequestError('test123');
-        }
-
-        $GLOBALS['_NETWORK'] = [
-            'site' => Site::getConfig('handle'),
-            'user' => [
-                'username' => 'nbey@b-21.org',
-                'email' => 'nbey@b-21.org',
-                'student_number' => 12345,
-                'first_name' => 'NafisTest',
-                'last_name' => 'BeyTest'
-            ]
-        ];
-
-        Site::executeScript($node);
-    }
-
     public static function handleFinishNetworkLoginRequest()
     {
         $queryParameters = http_build_query([
@@ -81,7 +56,7 @@ class Connector extends AbstractConnector
                         'PrimaryEmail' => $GLOBALS['Session']->Person->PrimaryEmail->toString()
                     ]
                 ),
-                'hostname' => 'vm.nafis.me:89' // TODO: replace with Site::getConfig('primary_hostname')
+                'hostname' => Site::getConfig('primary_hostname')
             ], static::$apiKey)
         ]);
 
@@ -90,7 +65,6 @@ class Connector extends AbstractConnector
         }
 
         $queryParameterGlue = strpos($_REQUEST['redirectUrl'], '?') === -1 ? '?' : '&';
-
         // TODO: can we always assume query params are being appending to existing, or should we check?
         header('Location: ' . $_REQUEST['redirectUrl'] . "{$queryParameterGlue}{$queryParameters}");
     }
