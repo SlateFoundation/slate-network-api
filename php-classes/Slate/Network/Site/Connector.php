@@ -72,8 +72,7 @@ class Connector extends AbstractConnector
     public static function handleNetworkLoginRequest()
     {
         $queryParameters = http_build_query([
-            'returnUrl' => '/network-api/finish-login?redirectUrl=' . $_REQUEST['redirectUrl'],
-            'redirectUrl' => $_REQUEST['redirectUrl'],
+            'returnUrl' => '/network-api/finish-login?' . http_build_query(['redirectUrl' => $_REQUEST['redirectUrl']]),
             'username' => $_REQUEST['username']
         ]);
 
