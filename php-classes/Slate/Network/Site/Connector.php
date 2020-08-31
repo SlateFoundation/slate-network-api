@@ -5,8 +5,10 @@ namespace Slate\Network\Site;
 use Site;
 
 use Emergence\Connectors\AbstractConnector;
-use \Emergence\People\PeopleRequestHandler;
-use \Emergence\People\Person;
+use Emergence\People\PeopleRequestHandler;
+use Emergence\People\Person;
+
+use Slate\People\Student;
 
 use Firebase\JWT\JWT;
 
@@ -72,9 +74,8 @@ class Connector extends AbstractConnector
     public static function handleNetworkLoginRequest()
     {
         $queryParameters = http_build_query([
-            'returnUrl' => '/network-api/finish-login?redirectUrl=' . $_REQUEST['redirectUrl'],
-            'redirectUrl' => $_REQUEST['redirectUrl'],
-            'username' => $_REQUEST['username']
+            'returnUrl' => '/network-api/finish-login?' . http_build_query(['redirectUrl' => $_REQUEST['redirectUrl']]),
+            '_LOGIN[username]' => $_REQUEST['username']
         ]);
 
         \Site::redirect('/login?'.$queryParameters);
@@ -88,7 +89,10 @@ class Connector extends AbstractConnector
         }
 
         PeopleRequestHandler::$accountLevelBrowse = false;
+
         Person::$dynamicFields['PrimaryEmail']['accountLevelEnumerate'] = null;
+        Student::$fields['StudentNumber']['accountLevelEnumerate'] = null;
+
         return PeopleRequestHandler::handleRequest();
     }
 }
