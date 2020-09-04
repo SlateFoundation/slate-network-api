@@ -1,7 +1,4 @@
 [holomapping]
-files = [
-    "*/**",
-    "!.github/",
-    "!.vscode/"
-]
+holosource = "=>emergence-layer"
+files = "**"
 after = "*"
