@@ -6,6 +6,7 @@ use Site;
 
 use Emergence\Connectors\AbstractConnector;
 use Emergence\People\PeopleRequestHandler;
+use Emergence\People\Groups\GroupsRequestHandler;
 use Emergence\People\Person;
 
 use Slate\People\Student;
@@ -42,6 +43,9 @@ class Connector extends AbstractConnector
 
             case 'finish-login':
                 return static::handleFinishNetworkLoginRequest();
+
+            case 'groups':
+                return static::handleGroupsRequest();
 
             default:
                 return parent::handleRequest();
@@ -94,5 +98,18 @@ class Connector extends AbstractConnector
         Student::$fields['StudentNumber']['accountLevelEnumerate'] = null;
 
         return PeopleRequestHandler::handleRequest();
+    }
+
+    public static function handleGroupsRequest()
+    {
+        $providedApiKey = $_REQUEST['apiKey'];
+        if (!static::$apiKey || !$providedApiKey || $providedApiKey != static::$apiKey) {
+            return static::throwInvalidRequestError('Request Failed. apiKey parameter must be configured properly.');
+        }
+
+        GroupsRequestHandler::$accountLevelBrowse = false;
+
+
+        return GroupsRequestHandler::handleRequest();
     }
 }
