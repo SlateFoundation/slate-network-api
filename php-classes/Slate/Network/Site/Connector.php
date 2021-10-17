@@ -70,8 +70,7 @@ class Connector extends AbstractConnector
             return static::throwInvalidRequestError('Redirect URL not set. Please try again or contact an administrator.');
         }
 
-        $queryParameterGlue = strpos($_REQUEST['redirectUrl'], '?') === -1 ? '?' : '&';
-        // TODO: can we always assume query params are being appending to existing, or should we check?
+        $queryParameterGlue = strpos($_REQUEST['redirectUrl'], '?') === false ? '?' : '&';
         header('Location: ' . $_REQUEST['redirectUrl'] . "{$queryParameterGlue}{$queryParameters}");
     }
 
